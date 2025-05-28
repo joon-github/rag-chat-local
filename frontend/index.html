@@ -1,0 +1,74 @@
+<!-- frontend/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>RAG Chat</title>
+  </head>
+  <body>
+    <h2>📁 RAG Chat</h2>
+    <div>
+      <h1>RAG 폴더 감시 시작</h1>
+      <button id="selectBtn">폴더 선택 및 감시</button>
+      <p id="status"></p>
+    </div>
+    <div>
+      <input
+        type="text"
+        id="question"
+        placeholder="질문 입력..."
+        style="width: 400px"
+      />
+      <button onclick="ask()">질문하기</button>
+      <pre id="response" style="white-space: pre-wrap"></pre>
+    </div>
+
+    <script>
+      async function ask() {
+        const q = document.getElementById("question").value;
+        const res = await fetch(
+          `http://localhost:8000/ask?q=${encodeURIComponent(q)}`
+        );
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        document.getElementById("response").innerText = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value);
+          document.getElementById("response").innerText += chunk;
+        }
+      }
+
+      const selectBtn = document.getElementById("selectBtn");
+      const status = document.getElementById("status");
+
+      selectBtn.addEventListener("click", async () => {
+        const folder = await window.electronAPI.selectFolder();
+        console.log(folder);
+        if (!folder) {
+          status.textContent = "취소됨";
+          return;
+        }
+
+        status.textContent = `📂 감시 중: ${folder}`;
+
+        // 백엔드로 watch 요청
+        fetch("http://localhost:8000/watch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ folder_path: folder }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            console.log("감시 시작 응답:", data);
+          })
+          .catch((err) => {
+            console.error("감시 실패:", err);
+            status.textContent = "❌ 감시 실패";
+          });
+      });
+    </script>
+  </body>
+</html>

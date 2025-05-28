@@ -1,0 +1,17 @@
+backend/.env
+backend/dist
+backend/build
+backend/fastapi-server.spec
+backend/venv
+backend/__pycache__
+backend/dist-electron
+backend/vector_store
+
+
+frontend/node_modules
+frontend/dist-electron
+frontend/build
+frontend/dist
+frontend/dist-electron
+frontend/build
+frontend/dist

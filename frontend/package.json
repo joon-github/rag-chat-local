@@ -12,11 +12,12 @@
     "directories": {
       "output": "dist-electron",
       "buildResources": "build",
-      "app": "build"
+      "app": "."
     },
     "files": [
       "main.js",
       "preload.js",
+      "index.html",
       "dist/**/*",
       "../backend/dist/**/*"
     ],
